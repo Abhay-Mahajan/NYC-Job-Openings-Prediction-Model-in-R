@@ -1,0 +1,230 @@
+---
+title: 'Project 1: Exploratory Analysis'
+author: "4 Idiots"
+date: "November 28, 2018"
+output:
+  word_document: default
+ 
+  html_document: default
+---
+
+
+
+## Exploratory Analysis
+
+
+```{r}
+require(ggplot2)
+require(tidyverse)
+require(lattice)
+nyc_data = read_csv('NYC_Jobs.csv')
+nyc_data
+```
+
+1.Relationship between Work Location and IT and Non IT Job Opening with graph and explaination.
+
+#### Ans.1
+
+```{r}
+IT_Location = nyc_data %>% group_by(`Work Location`) %>% summarize(IT_Opening = sum(IT))
+IT_Location
+```
+
+```{r}
+
+ggplot(data=IT_Location, aes(x=`Work Location`, y=IT_Opening)) +
+    geom_bar(stat="identity", position=position_dodge(),fill="#56B4E9")+
+    labs(title="Locations Vs Number of IT Opening")
+```
+
+Above graph shows the relationship between Work Location and IT Job Openings.
+
+In NYC, in Manhattan has the maximum number of IT Job Opening around 250. After Manhattan, there are around 160 IT Job opening in Brooklyn. Whereas in the Bronx, there are not any IT Job Opening.
+
+```{r}
+NonIT_Location = nyc_data %>% group_by(`Work Location`) %>% summarize(NonIT_Opening = sum(Non_IT))
+NonIT_Location
+```
+
+
+```{r}
+ggplot(data=NonIT_Location, aes(x=`Work Location`, y=NonIT_Opening)) +
+    geom_bar(stat="identity", position=position_dodge(),fill="#56B4E9")+
+    labs(title="Locations Vs Number of Non IT Opening")
+
+```
+
+Above graph shows the relationship between Work Location and Non-IT Job Openings.
+
+In NYC, there are maximum non-IT Job Openings in Manhattan around 1500. After Manhattan, in Queens, there are Non-IT Job Openings around 1250. Whereas in S.I(Staten Island), there is almost no job opening in Non-IT.
+
+2.Relationship between Work Location and salary range according to IT and NonIT Opening.
+
+#### Ans.2
+
+```{r}
+
+#%>% filter(IT != 0)
+IT_salary_range = nyc_data  %>%  group_by(`Work Location`) %>% summarize('IT Salary From' = round(mean(IT_Salary_From)), 'IT Salary To' = round(mean(IT_Salary_To)))
+IT_salary_range
+IT_Sal = gather(IT_salary_range, 'IT Salary Range', IT_Salary, 2:3)
+IT_Sal
+
+```
+
+```{r}
+ggplot(data=IT_Sal, aes(x=`Work Location`, y=IT_Salary, fill=`IT Salary Range`)) +
+    geom_bar(stat="identity", position=position_dodge(), colour="black") +
+    scale_fill_manual(values=c("#999999", "#ff9999"))
+
+
+```
+
+Above graph shows the relationship between Work Location and Salary Range of IT job openings. Brown bar show minimum salary and Yellow bar shows maximum salary for a particular IT Job Opening.
+Note, there are no It Job Openings in Bronx so, we will not consider that.
+We can see that Manhattan has maximum salary range which is from 17500 to 25000 and this is average salary range. S.I has minimum salary range which is from around 4000 to 7000.
+
+
+```{r}
+NonIT_salary_range = nyc_data  %>%  group_by(`Work Location`) %>% summarize('Non-IT Salary From' = round(mean(NonIT_Salary_from)), 'Non-IT Salary To' = round(mean(NonIT_Salary_To)))
+
+NonIT_Sal = gather(NonIT_salary_range, 'NonIT Salary Range', NonIT_Salary, 2:3)
+NonIT_Sal
+```
+
+```{r}
+ggplot(data=NonIT_Sal, aes(x=`Work Location`, y=NonIT_Salary, fill=`NonIT Salary Range`)) +
+    geom_bar(stat="identity", position=position_dodge(), colour="black") +
+    scale_fill_manual(values=c("#999999", "#ff9999"))
+```
+
+
+Above graph shows the relationship between Work Location and Salary Range of Non-IT job openings. Brown bar show minimum salary and Yellow bar shows maximum salary for a particular IT Job Opening.
+
+We can see that NYC has maximum salary range which is around from 60000 to 95000 and this is average salary range.
+If we look particular NYC boroughs. Then Manhattan has maximum salary range for Non-IT Job Opening which is around 55000 to 76000. Bronx has minimum salary range which is from around 40000 to 52000. These ranges are average value of salary range.
+
+3. What is the average maximum and minimum annual and hourly salary in each locations.
+
+#### Ans.3
+
+```{r}
+df2 = rename(nyc_data ,AvgMinAnnualSalary = Annual_salary_from, AvgMaxAnnualSalary= Annual_Salary_to, AvgMinHourlySalary = Hourly_Salary_from , AvgMaxHourlySalary = Hourly_Salary_to)
+
+dd = df2 %>% group_by(`Work Location`) %>% summarise(AvgMinAnnualSalary = round(mean(AvgMinAnnualSalary)), AvgMaxAnnualSalary=round(mean(AvgMaxAnnualSalary)), AvgMinHourlySalary = round(mean(AvgMinHourlySalary)) , AvgMaxHourlySalary=round(mean(AvgMaxHourlySalary)))
+
+dd
+
+```
+EXPLANATION - The above analysis result shows the average minimum and miximum salary in all the locations. The maximum and minimum average salary is annually and hourly based. This means that our analysis collect all the minimum and maximum salaries location wise and then calculates the average of all to give the results.
+
+```{r}
+dd3 =gather(dd, 'Annual Salary Range', Salary, 2:3)
+ggplot(data=dd3, aes(x=`Work Location`, y=Salary, fill=`Annual Salary Range`)) +
+    geom_bar(stat="identity", position=position_dodge(), colour="black") +
+    scale_fill_manual(values=c("#999999", "#E69F00"))
+```
+
+EXPLANATION -The above plot shows the Annual average maximum and minimum salary on all locations. The average maximum salary is in NYC and least maximum salary is in Bronx. The highest average minimum annual salary is in NYC and least average minimum is at Bronx.
+
+```{r}
+hourly =gather(dd, 'Hourly Salary Range', Salary, 4:5)
+
+hourly
+ggplot(data=hourly, aes(x=`Work Location`, y=Salary, fill=`Hourly Salary Range`)) +
+    geom_bar(stat="identity", position=position_dodge(), colour="black") +
+    scale_fill_manual(values=c("#999999", "#E69F00"))
+```
+
+EXPLANATION -The above plot shows that average maximum and minimum hourly salary on all locations. The average maximum salary is in Queens and least maximum salary is in NYC. The highest average minimum hourly salary is in Queens and least average minimum is at NYC.
+
+4. How many part-time and full time jobs are there in each location.
+
+#### Ans.4
+
+```{r}
+df3<- nyc_data %>% group_by(`Work Location`) %>% summarise(Part_Time = sum(Part_Time), Full_Time=sum(Full_Time))
+df3
+df4=gather(df3,F_T_Time,F_T_number,2:3)
+df4
+```
+
+
+
+```{r}
+ggplot(data=df4, aes(x=`Work Location`, y=F_T_number, fill=F_T_Time)) +
+    geom_bar(stat="identity", position=position_dodge(), colour="black") +
+    scale_fill_manual(values=c("#999999", "#E69F00"))
+```
+
+Explaination--- The above result describes that 'Manhattan' has the maximum number of Part_Time jobs =1564, where as S.I. has the lowest number of Part_Time jobs=43.
+On the other hand, Queens has the maximum number of Full_Time jobs=188 , whereas S.I again as the lowest number of Full_Time jobs= 2.
+The ranking for Part_Time would be - Manhattan,Queens,Brooklyn,NYC,Bronx,S.I.
+The ranking for Full_Time would be - Queens,Manhattan,Brooklyn,NYC,Bronx,S.I.
+
+
+5. Relashionship between salary frequency based on location. Which Work Location has the most jobs opening provided with Annual Salary/Daily Salary/Hourly. Salary?
+
+#### Ans.5
+
+1.Locations Vs AnnualSalaryFreq
+```{r}
+jobannual <- aggregate(nyc_data$Annual_Salary_freq, by=list(nyc_data$`Work Location`), FUN=sum)
+jobannual
+colnames(jobannual) <- c("Locations", "AnnualSalaryFreq")  
+jobannual <- jobannual[order(jobannual$AnnualSalaryFreq), ]  
+jobannual$Locations <- factor(jobannual$Locations, levels = jobannual$Locations)
+head(jobannual,8)
+```
+
+```{r}
+# Draw plot
+ggplot(jobannual, aes(x=Locations, y=AnnualSalaryFreq)) + geom_bar(stat="identity", width=.5, fill="tomato3") + labs(title="Ordered Bar Chart",subtitle="Locations Vs AnnualSalaryFreq", caption="source: NYC_Jobs")
+```
+
+From the above graph “Locations Vs AnnualSalaryFreq”, it can be seen that
+*Manhattan has the most jobs opening, total of 1592, provide with annual salary. 
+*The ranking will be: Manhattan, Queens, Brooklyn, Bronx, Staten Island.
+
+2.Locations Vs DailySalaryFreq
+```{r}
+jobdaily <- aggregate(nyc_data$Daily_salary_freq, by=list(nyc_data$`Work Location`), FUN=sum)  
+colnames(jobdaily) <- c("Locations", "DailySalaryFreq")  
+jobdaily <- jobdaily[order(jobdaily$DailySalaryFreq), ] 
+jobdaily$Locations <- factor(jobdaily$Locations, levels = jobdaily$Locations) 
+head(jobdaily,8)
+```
+
+```{r}
+ggplot(jobdaily, aes(x=Locations, y=DailySalaryFreq)) + geom_bar(stat="identity", width=.5, fill="tomato3") + labs(title="Ordered Bar Chart",subtitle="Locations Vs DailySalaryFreq", caption="source: NYC_Jobs")
+```
+
+From the above graph “Locations Vs DailySalaryFreq”, it can be seen that
+*Manhattan has the most jobs opening, total of 13, provide with daily salary. And there are zero jobs opening provide with daily salary in Staten Island. 
+*The ranking will be: Queens, Manhattan, Bronx, Brooklyn, Staten Island.
+
+3.Locations Vs HourlySalaryFreq
+```{r}
+jobhourly <- aggregate(nyc_data$Hourly_salary_freq, by=list(nyc_data$`Work Location`), FUN=sum)  
+colnames(jobhourly) <- c("Locations", "HourlySalaryFreq") 
+jobhourly <- jobhourly[order(jobhourly$HourlySalaryFreq), ]  
+jobhourly$Locations <- factor(jobhourly$Locations, levels = jobhourly$Locations)
+head(jobhourly,8)
+```
+
+```{r}
+ggplot(jobhourly, aes(x=Locations, y=HourlySalaryFreq)) + geom_bar(stat="identity", width=.5, fill="tomato3") + labs(title="Ordered Bar Chart",subtitle="Locations Vs HourlySalaryFreq", caption="source: NYC_Jobs")
+```
+
+From the above graph “Locations Vs HourlySalaryFreq”, it can be seen that
+*Manhattan has the most jobs opening, total of 127, provide with Hourly salary. And there are only 4 jobs opening provide with hourly salary in Staten Island. 
+*The ranking will be: Manhattan, Queens, Brooklyn, Bronx, Staten Island.
+
+Observation
+From the above result it is seen that Manhattan has the most jobs opening on both Anuuanl and Hourly salary. Queens has the most jobs opening for Daily Salary and has the second most jobs opening with Annual and Hourly salary. Staten Island has the least number of jobs opening on all anuual, daliy, and hourly salary.
+
+
+
+
+
+

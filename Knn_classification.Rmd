@@ -1,0 +1,106 @@
+---
+title: "Project_2"
+author: "4 Idiots Group"
+date: "December 4, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+require(tidyverse)
+require(class)
+
+```
+
+```{r}
+
+nyc_data = read_csv('NYC_Jobs_2.csv')
+nyc_data
+
+```
+
+```{r}
+select_data = select(nyc_data, c(`Work Location`, IT, Non_IT))
+
+salary = round((nyc_data$Annual_salary_from +  nyc_data$Annual_Salary_to) /2)
+
+
+new_data = mutate(select_data, salary = salary)
+
+location_openings =gather(new_data, IT_cat, Openings, 2:3)
+
+category =as.numeric(as.factor(location_openings$IT_cat))
+
+final_data_0 = mutate(location_openings, IT=category )
+final_data = filter(final_data_0,Openings != 0)
+final_data
+
+```
+
+
+```{r}
+
+input = subset(final_data, select = c(salary, Openings))
+label = final_data$IT_cat
+
+```
+
+```{r}
+input_n = sapply(input, function(x){(x-min(x))/(max(x)-min(x))}) 
+
+```
+
+```{r}
+
+location_dummies = model.matrix(~`Work Location`-1,data=final_data) 
+
+input_n_new = data.frame(input_n, location_dummies)
+#input_n_new
+
+```
+
+```{r}
+set.seed(1234)
+indices = sample(1:2, size=nrow(input_n_new), replace = T, prob = c(.8,.2))
+
+
+data = data.frame(indices==1, input_n_new)
+
+training_input = input_n_new[indices == 1,]
+testing_input = input_n_new[indices == 2,]
+
+training_label = label[indices==1]
+testing_label = label[indices==2]
+
+```
+
+```{r}
+
+
+set.seed(1234)
+
+#sqrt(nrow(training_input))
+
+predications = knn(train = training_input, test=testing_input,cl=training_label, k=13)
+
+sum(predications==testing_label)/length(testing_label)
+
+table(predications,testing_label)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

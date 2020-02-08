@@ -47,3 +47,4 @@ KNN classification was implemented to predict the IT and non-IT job opening in n
 **Knn_classification.Rmd** - Built KNN classification model<br/>
 **KNN_prediction_report.pdf** - Predictive analysis report, explained result in detail<br/>
 **Knn_classification(knitted).pdf** - PDF report file, generated from rmd file<br/>
+
